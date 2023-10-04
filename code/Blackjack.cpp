@@ -28,13 +28,15 @@ void Blackjack::blackjackGame()
             choice = toUpperCase(choice);           // Takes in user's choice then capitalizes it
 
             if (choice == 'H') {
+                checkStrategy(playerTotal, dealerTotal);
                 playerHit(playerHand, playerTotal);
                 if (calcTotal(playerHand) > 21) {
                     cout << "Bust! You lose!" << endl;
                     break;
                 }                    
             }
-            else if (choice == 'S') {         
+            else if (choice == 'S') {  
+                checkStrategy(playerTotal, dealerTotal);
                 playerStand(dealerHand, dealerTotal);
                 cout << "(" << dealerTotal << ")" << endl;
 
@@ -49,9 +51,8 @@ void Blackjack::blackjackGame()
                     cout << "It's a tie!" << endl;
                 }
                 break;
-            }
+            }       
         }
-
         playAgain = anotherGame();
     }
 }
@@ -152,6 +153,39 @@ void Blackjack::playerStand(vector<int>& hand, int& total)
 
 }
 
+void Blackjack::checkStrategy(const int playerTotal, const int dealerTotal)
+{
+    if (playerTotal <= 8) {
+        cout << "You should always hit on anything 8 and below\n";
+    }
+    if (playerTotal == 9 && (dealerTotal >= 3 && dealerTotal <= 6)) {
+        cout << "When you have a 9, Double on the dealers 3 - 6\n";
+    }
+    else if (playerTotal == 9) {
+        cout << "Hit on 9 when the dealer has a 2 or 7 and Up\n";
+    }
+    if (playerTotal == 10 && (dealerTotal >= 2 && dealerTotal <= 9)) {
+        cout << "With a 10, Double on 2 - 9\n";
+    }
+    else if (playerTotal == 10) {
+        cout << "Hit on a 10 when dealer has 10 or an Ace\n";
+    }
+    if (playerTotal == 11) {
+        cout << "Always Double on an 11\n";
+    }
+    if (playerTotal == 12 && (dealerTotal <= 3 || dealerTotal >= 7)) {
+        cout << "A 12 requires you to Hit on a 2,3,7,8,9,10,A\n";
+    }
+    else if (playerTotal == 12) {
+        cout << "Stand on a 12 when the dealer has a 4,5, or 6\n";
+    }
+    if ((playerTotal >= 13 || playerTotal <= 16) && dealerTotal <= 6) {
+        cout << "Stand on 13,14,15,16 when the dealer has anything 6 and under\n";
+    }
+    else if (playerTotal == 13 || playerTotal <= 16) {
+        cout << "Hit on 13 - 16 when the dealer has a 7 or higher\n";
+    }
+}
 
 /**
  * Determine if the game is over.
