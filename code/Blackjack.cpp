@@ -3,79 +3,49 @@
 
 void Blackjack::blackjackGame()
 {
-    srand(time(nullptr));
+    srand(time(nullptr));   // Random Number Generator
 
     cout << "Work In Progress Blackjack Basic Strategy!" << endl;
     char playAgain = 'Y';
 
-    // True if play underway. This will become false when the player
-    // no longer wants to play.
-
-    while (playAgain == 'Y')
+    while (playAgain == 'Y') 
     {
-        // Clear the previous player hand
-        playerHand.clear();
-
-        // Deal two card to the player
-        playerHand.push_back(randomCard());
-        playerHand.push_back(randomCard());
-
-        // Clear the previous dealer hand
-        dealerHand.clear();
-
-        // Deal two card to the dealer
-        dealerHand.push_back(randomCard());
-        dealerHand.push_back(randomCard());
-
+        dealCards(playerHand);
+        dealCards(dealerHand);                      // Cards dealt to both plaer and dealer
         int playerTotal = calcTotal(playerHand);
+        int dealerTotal = calcTotal(dealerHand);    // Hands are totaled
 
-        cout << "Your Hand: " << playerHand[0] << " and " << playerHand[1] << " = "  << playerTotal << endl;
+        cout << "Your Hand: " << playerHand[0] << " and " << playerHand[1] << " = " << playerTotal << endl;
         cout << "Dealer's face-up card: " << dealerHand[0] << endl;
 
         // Playing the game
         while (true) {
-            //int playerTotal = calcTotal(playerHand);
-            if (Blackjack::isGameOver(playerTotal)) break;
+            if (isGameOver(playerTotal)) break; // Checks for Win/Loss
 
             char choice;
             cout << "Do you want to hit (H) or stand (S)? ";
             cin >> choice;
-            choice = toUpperCase(choice);
+            choice = toUpperCase(choice);           // Takes in user's choice then capitalizes it
 
             if (choice == 'H') {
-                playerHand.push_back(randomCard());
-                cout << "You drew: " << playerHand.back() << endl;
-                playerTotal = calcTotal(playerHand);
-                cout << "New Total: " << playerTotal << endl;
-
+                playerHit(playerHand, playerTotal);
                 if (calcTotal(playerHand) > 21) {
                     cout << "Bust! You lose!" << endl;
                     break;
-                }
-            } else if (choice == 'S') {
-                int dealerTotal = calcTotal(dealerHand);
-
-                // Load up the dealer cards
-                while (dealerTotal < 17) {
-                    dealerHand.push_back(randomCard());
-                    dealerTotal = calcTotal(dealerHand);
-                }
-
-                // Output dealer hand
-                cout << "Dealer's hand: ";
-
-                for (int card: dealerHand) {
-                    cout << card << " ";
-                }
-
+                }                    
+            }
+            else if (choice == 'S') {         
+                playerStand(dealerHand, dealerTotal);
                 cout << "(" << dealerTotal << ")" << endl;
 
                 // Declaring a winner
                 if (dealerTotal > 21 || playerTotal > dealerTotal) {
                     cout << "You win!" << endl;
-                } else if (playerTotal < dealerTotal) {
+                }
+                else if (playerTotal < dealerTotal) {
                     cout << "Dealer wins!" << endl;
-                } else {
+                }
+                else {
                     cout << "It's a tie!" << endl;
                 }
                 break;
@@ -87,6 +57,16 @@ void Blackjack::blackjackGame()
 }
 
 
+
+void Blackjack::dealCards(vector<int>& hand)
+{
+    // Clear the previous hand
+    hand.clear();
+
+    // Deal two cards
+    hand.push_back(randomCard());
+    hand.push_back(randomCard());
+}
 
 /**
  *
@@ -145,6 +125,33 @@ char Blackjack::toUpperCase(char choice)
     }
 }
 
+void Blackjack::playerHit(vector<int>& hand, int& total)
+{
+    hand.push_back(randomCard());
+    cout << "You drew: " << hand.back() << endl;
+    total = calcTotal(hand);
+    cout << "New Total: " << total << endl;
+}
+
+void Blackjack::playerStand(vector<int>& hand, int& total)
+{
+    // Load up the dealer cards
+    while (total < 17) {
+        hand.push_back(randomCard());
+        total = calcTotal(dealerHand);
+    }
+
+    // Output dealer hand
+    cout << "Dealer's hand: ";
+
+    for (int card : hand) {
+        cout << card << " ";
+    }
+
+    cout << "(" << total << ")" << endl;
+
+}
+
 
 /**
  * Determine if the game is over.
@@ -154,16 +161,16 @@ char Blackjack::toUpperCase(char choice)
  */
 bool Blackjack::isGameOver(int score)
 {
-            if (score == 21)
-            {
-                cout << "Blackjack! You win!" << endl;
-                return true;
-            }
-            else if (score > 21)
-            {
-                cout << "Bust! You lose!" << endl;
-                return true;
-            }
+    if (score == 21)
+    {
+        cout << "Blackjack! You win!" << endl;
+        return true;
+    }
+    else if (score > 21)
+    {
+        cout << "Bust! You lose!" << endl;
+        return true;
+    }
 
     return false;
 }
@@ -180,13 +187,14 @@ char Blackjack::anotherGame()
 
     cout << "Do you want to play again? (Y/N): ";
 
-    while (! done) {
+    while (!done) {
         // Get the user response
         cin >> response;
         response = toUpperCase(response);
         if (response == 'Y' || response == 'N') {
             done = true;
-        } else {
+        }
+        else {
             cout << "\n\nPlease enter Y or N.\n\n";
         }
     }
