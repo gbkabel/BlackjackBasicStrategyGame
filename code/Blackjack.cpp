@@ -27,8 +27,9 @@ void Blackjack::blackjackGame()
             cin >> choice;
             choice = toUpperCase(choice);           // Takes in user's choice then capitalizes it
 
+            checkAces(playerHand, numAces);
             if (choice == 'H') {
-                checkStrategy(playerTotal, dealerTotal);
+                checkStrategy(playerTotal, dealerTotal, numAces, playerHand);
                 playerHit(playerHand, playerTotal);
                 if (calcTotal(playerHand) > 21) {
                     cout << "Bust! You lose!" << endl;
@@ -36,7 +37,7 @@ void Blackjack::blackjackGame()
                 }                    
             }
             else if (choice == 'S') {  
-                checkStrategy(playerTotal, dealerTotal);
+                checkStrategy(playerTotal, dealerTotal, numAces, playerHand);
                 playerStand(dealerHand, dealerTotal);
                 cout << "(" << dealerTotal << ")" << endl;
 
@@ -107,6 +108,28 @@ int Blackjack::calcTotal(const vector<int>& hand)
     return total;
 }
 
+int Blackjack::checkAces(const vector<int>& hand, int& numAces)
+{
+    numAces = 0;
+
+    for (int card : hand)
+    {
+        if (card == 11)
+        {
+            numAces++;
+        }
+    }
+    return numAces;
+}
+
+bool Blackjack::isPair(vector<int>& hand)
+{
+    if (hand.size() != 2) {
+        return false;
+    }
+    return hand[0] == hand[1];
+}
+
 
 /**
  *
@@ -153,8 +176,9 @@ void Blackjack::playerStand(vector<int>& hand, int& total)
 
 }
 
-void Blackjack::checkStrategy(const int playerTotal, const int dealerTotal)
+void Blackjack::checkStrategy(const int playerTotal, const int dealerTotal, const int numAces, vector<int>& hand)
 {
+    // Hard Totals
     if (playerTotal <= 8) {
         cout << "You should always hit on anything 8 and below\n";
     }
@@ -179,11 +203,110 @@ void Blackjack::checkStrategy(const int playerTotal, const int dealerTotal)
     else if (playerTotal == 12) {
         cout << "Stand on a 12 when the dealer has a 4,5, or 6\n";
     }
-    if ((playerTotal >= 13 || playerTotal <= 16) && dealerTotal <= 6) {
+    if ((playerTotal >= 13 && playerTotal <= 16) && dealerTotal <= 6) {
         cout << "Stand on 13,14,15,16 when the dealer has anything 6 and under\n";
     }
-    else if (playerTotal == 13 || playerTotal <= 16) {
+    else if (playerTotal >= 13 && playerTotal <= 16) {
         cout << "Hit on 13 - 16 when the dealer has a 7 or higher\n";
+    }
+    if (playerTotal == 17) {
+        cout << "Stand on 17 and Up\n";
+    }
+
+    // Soft Totals
+    if ((numAces == 1 && (playerTotal == 13 || playerTotal == 14)) && (dealerTotal >= 5 && dealerTotal <=6)) {
+        cout << "If allowed, Double on soft 13 when dealer has 5 or 6\n";
+    }
+    else if (numAces == 1 && (playerTotal == 13 || playerTotal == 14)) {
+        cout << "Hit on soft 13 when the dealer has a 2,3,4,7,8,9,10.A\n";
+    }
+    if ((numAces == 1 && (playerTotal == 15 || playerTotal == 16)) && (dealerTotal >= 4 && dealerTotal <= 6)) {
+        cout << "Double on soft 15 and 16 when dealer has 4,5, or 6\n";
+    }
+    else if (numAces == 1 && (playerTotal == 15 || playerTotal == 16)) {
+        cout << "With a soft 15 or 16, Hit when dealer has 2,3,7,8,9,10,A\n";
+    }
+    if ((numAces == 1 && playerTotal == 17) && (dealerTotal >= 3 && dealerTotal <= 6)) {
+        cout << "Double on soft 17 when dealer has 3,4,5, and 6\n";
+    }
+    else if (numAces == 1 && playerTotal == 17) {
+        cout << "Hit on Soft 17 when dealer has 2,7,8,9,10,A\n";
+    }
+    if ((numAces == 1 && playerTotal == 17) && (dealerTotal >= 3 && dealerTotal <= 6)) {
+        cout << "Double on soft 17 when dealer has 3,4,5, and 6\n";
+    }
+    if ((numAces == 1 && playerTotal == 18) && dealerTotal <= 6) {
+        cout << "Double on soft 18 against 6 and below, Otherwise stand\n";
+    }
+    else if ((numAces == 1 && playerTotal == 18) && (dealerTotal >= 7 && dealerTotal <= 8)) {
+        cout << "Stand on soft 18 when dealer has 7 or 8\n";
+    }
+    else if ((numAces == 1 && playerTotal == 18) && dealerTotal >= 9) {
+        cout << "Hit on soft 18 against 9 and Up\n";
+    }
+    if ((numAces == 1 && playerTotal == 19) && dealerTotal == 6) {
+        cout << "Double on soft 19 only against 6, if not then stand\n";
+    }
+    else if ((numAces == 1 && playerTotal == 19) && (dealerTotal <= 5 || dealerTotal >= 7)) {
+        cout << "Stand on soft 19 on eveything except a 6\n";
+    }
+    if (numAces == 1 && playerTotal == 19) {
+        cout << "Stand on soft 20 no matter what\n";
+    }
+
+    // Pair Splitting
+    int pairNumber = 0;
+    if (isPair(hand))
+    {
+        pairNumber = hand[0];
+        if ((pairNumber == 2 || pairNumber == 3) && dealerTotal <= 3) {
+            cout << "Split 2's and 3's only if Double After Split is allowed when dealer has 2 or 3\n";
+        }
+        else if ((pairNumber == 2 || pairNumber == 3) && (dealerTotal >= 4 && dealerTotal <= 7)) {
+            cout << "Split 2's and 3's against dealers 4 - 7\n";
+        }
+        else if ((pairNumber == 2 || pairNumber == 3) && dealerTotal >= 8) {
+            cout << "Dont split 2's or 3's against 8,9,10,A\n";
+        }
+        if (pairNumber == 4 && (dealerTotal <= 4 || dealerTotal >= 7)) {
+            cout << "With a pair of 4's, don't split on 2,3,4,7,8,9,10,A\n";
+        }
+        else if (pairNumber == 4 && (dealerTotal >= 5 &&  dealerTotal <= 6)) {
+            cout << "Split 4's against 5 and 6 if double after split is allowed\n";
+        }
+        if (pairNumber == 5) {
+            cout << "Never Split a pair of 5's\n";
+        }
+        if (pairNumber == 6 && dealerTotal == 2) {
+            cout << "Split 6's on dealers 2 if you can double after the split\n";
+        }
+        else if (pairNumber == 6 && (dealerTotal >= 3 && dealerTotal <= 6)) {
+            cout << "Split 6's when dealer has 3 - 7\n";
+        }
+        else if (pairNumber == 6 && dealerTotal >= 7) {
+            cout << "Do not split 6's against a 7 or higher\n";
+        }
+        if (pairNumber == 7 && dealerTotal <= 7) {
+            cout << "Split 7's against dealers 7 and under\n";
+        }
+        else if (pairNumber == 7 && dealerTotal >= 8) {
+            cout << "Do not split 7's against 8,9,10,A\n";
+        }
+        if (pairNumber == 8) {
+            cout << "Always split 8's\n";
+        }
+        if (pairNumber == 9 && (dealerTotal <= 6 || dealerTotal >= 8)) {
+            cout << "Split 9's on everything except 7\n";
+        }
+        else if (pairNumber == 9 && dealerTotal == 7) {
+            cout << "Dont split 9's against 7\n";
+        }
+        if (pairNumber == 10) {
+            cout << "Pair of 10's is never split\n";
+        }
+        if (pairNumber == 11) {
+            cout << "Always Split Aces\n";
+        }
     }
 }
 
