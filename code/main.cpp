@@ -1,9 +1,9 @@
 #include "Blackjack.h"
 
-int main ()
+int main()
 {
-  Blackjack Blackjack;
-  Blackjack.blackjackGame();
-  
-  return 0;
+	Blackjack Blackjack;		    // Creating object from Blackjack class
+	Blackjack.blackjackGame();	// Loads Blackjack game
+
+	return 0;
 }
